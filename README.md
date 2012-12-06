@@ -1,17 +1,21 @@
-# gapi
+clj-gapi
+==========
 
 A simple client for Google web service APIs that are described by the discovery document API. See https://developers.google.com/console for a full list of APIs that can be addressed by this. Ensure that a console project has been created for any access you wish to do!
 
-## Usage
+Usage
+-------------------------
 
-### Quick Start
+Quick Start
+-------------------------
 
 For very simple API access, you can make an immediate call - in this case to the Google+ API.
 
     (def auth (gapi.auth/create-auth "YOUR_API_KEY"))
     (im "plus.activities/search" auth {"query" "clojure"})
 
-### Other Usage
+Other Usage
+-------------------------
 
 To list the available APIs and version, you can query the discovery document: 
 
@@ -58,7 +62,8 @@ We can write as well. For example, here we can use the URL shortener API (which 
     (def result (call service "urlshortener.url/insert {} {"longUrl" "http://clojure.org"}))
     (pprint result)
     
-## License
+License
+-------------------------
 
 Copyright (C) 2012 Google
 
