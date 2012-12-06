@@ -55,8 +55,8 @@
 
 (defn call
 	"Call a service function"
-	[service method & args]
-	(apply ((service method) :fn) args))
+	[auth service method & args]
+	(apply ((service method) :fn) auth args))
 
 ;; Memoized versions of API calls 
 (def ^{:private true} m-list-apis (memoize list-apis))
@@ -64,12 +64,12 @@
 
 (defn im
 	"Call a service, constructing if necessary"
-	[method_name & args]
+	[auth method_name & args]
 	(let [
 		service_name (first (clojure.string/split method_name #"[\.\/]"))
 		api (last (filter #(= (first %1) service_name) (m-list-apis)))
 		service (m-build (last api))]
-		(apply call service method_name args)))
+		(apply call auth service method_name args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;; HELPER METHODS ;;;;;;;;;;;

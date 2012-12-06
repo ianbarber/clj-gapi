@@ -12,7 +12,7 @@ Quick Start
 For very simple API access, you can make an immediate call - in this case to the Google+ API.
 
     (def auth (gapi.auth/create-auth "YOUR_API_KEY"))
-    (im "plus.activities/search" auth {"query" "clojure"})
+    (im auth "plus.activities/search" {"query" "clojure"})
 
 Other Usage
 -------------------------
@@ -37,7 +37,7 @@ For simple API access, we need to pass in our API key to the auth class. This re
     
 To call a function, we need to pass in the auth and the params. 
 
-    (def results (call service "plus.activities/search" auth {"query" "clojure"}))
+    (def results (call auth service "plus.activities/search"  {"query" "clojure"}))
     (map #(str (%1 :url) "-" (%1 :title)) (results :items))
     
 To use OAuth2, we need to generate a ClientID and ClientSecret, and set a redirect URL. We can create a new "web application" client in the Google developers console
@@ -53,13 +53,13 @@ We then need to generate a token URL to authenticate against. The user will be r
     
 To make a call, we can then use the service as before
 
-    (def me (call service "plus.people/get" auth {"userId" "me"}))
+    (def me (call auth service "plus.people/get" {"userId" "me"}))
     (pprint (me :displayName))
   
 We can write as well. For example, here we can use the URL shortener API (which you'll need to enable in the developer API console!) to create a short URL to clojure.org:
 
     (def service (build "https://www.googleapis.com/discovery/v1/apis/urlshortener/v1/rest"))
-    (def result (call service "urlshortener.url/insert {} {"longUrl" "http://clojure.org"}))
+    (def result (call auth service "urlshortener.url/insert" {} {"longUrl" "http://clojure.org"}))
     (pprint result)
     
 License
