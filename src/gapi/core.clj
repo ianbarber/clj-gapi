@@ -11,6 +11,7 @@
 
 ;; Forward Declarations
 (declare extract-methods)
+(declare build-ns)
 
 ;; The base Discovery Service URL we will process
 (def ^{:private true} discovery_url "https://www.googleapis.com/discovery/v1/apis")
@@ -71,9 +72,27 @@
 		service (m-build (last api))]
 		(apply call auth service method_name args)))
 
+(defn api-ns
+	"Create a namespace for the API calls. TODO: details"
+	[auth api_url]
+	(let [	service (m-build api_url)
+			build-fn (partial build-ns auth)]
+		(map build-fn service)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;; HELPER METHODS ;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn- build-ns
+	"Create an entry in a namespace for the method"
+	[auth [mname method]]
+	(let [	name (str "gapi." mname)
+			parts (clojure.string/split name #"[\.\/]")
+			namespace (symbol (clojure.string/join "." (pop parts)))]
+				;; how? ^{:doc (method :doc)} 
+				(if (= nil (find-ns namespace)) (create-ns namespace))
+				(intern namespace (symbol (last parts)) (partial (method :fn) auth))
+				name))
 
 (defn- get-method-name
 	"Get a friendly namespace-esque string for the method"

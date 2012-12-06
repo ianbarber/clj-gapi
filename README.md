@@ -13,6 +13,19 @@ For very simple API access, you can make an immediate call - in this case to the
 
     (def auth (gapi.auth/create-auth "YOUR_API_KEY"))
     (im auth "plus.activities/search" {"query" "clojure"})
+    
+Namespace Usage
+-------------------------
+
+The library can generate a series of functions in a namespace based on the API name
+
+    (def auth (gapi.auth/create-auth "AIzaSyCEWwrbXAGMK_P97lcq8FOgQGP5LA7QAzk"))
+    (api-ns auth "https://www.googleapis.com/discovery/v1/apis/plus/v1/rest")
+    
+This will generate an API based on the Google+ service. We will now have names such that map to the resources and functions for the activities. For example gapi.plus.activites/search. 
+  
+    (def results (gapi.plus.activities/search {"query" "clojure"}))
+    (pprint (map #(str (%1 :url) "-" (%1 :title)) (results :items)))
 
 Other Usage
 -------------------------
@@ -21,19 +34,19 @@ To list the available APIs and version, you can query the discovery document:
 
     (pprint (list-apis))
 
+For simple API access, we need to pass in our API key to the auth class. This requires a key generated from a project in the Google developers API console at https://developers.google.com/console. Create a project and go to "API Access" on the left and look for the Simple API Access API key
+
+  (def auth (gapi.auth/create-auth "YOUR_API_KEY"))
+
 To retrieve the calls for an API, you pass in the API string. In this case, the Google+ public data API. 
 
-    (def service (build "https://www.googleapis.com/discovery/v1/apis/plus/v1/rest"))
+    (def service (build auth "https://www.googleapis.com/discovery/v1/apis/plus/v1/rest"))
   
 Too see which methods are available:
 
     (list-methods service)
     (print (get-doc service "plus.people/listByActivity"))
     (get-scopes service "plus.people/listByActivity")
-    
-For simple API access, we need to pass in our API key to the auth class. This requires a key generated from a project in the Google developers API console at https://developers.google.com/console. Create a project and go to "API Access" on the left and look for the Simple API Access API key
-
-    (def auth (gapi.auth/create-auth "YOUR_API_KEY"))
     
 To call a function, we need to pass in the auth and the params. 
 
