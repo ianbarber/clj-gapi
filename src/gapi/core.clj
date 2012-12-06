@@ -14,6 +14,7 @@
 
 ;; The base Discovery Service URL we will process
 (def ^{:private true} discovery_url "https://www.googleapis.com/discovery/v1/apis")
+(def ^{:private true} cache (atom {}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;  API  ;;;;;;;;;;;;;;
@@ -23,7 +24,7 @@
 	"Return a list of APIs available to built, and endpoint discovery document URLs."
 	[]
     (let [discovery-doc (json/read-json ((http/get discovery_url) :body))]
-        (map #(vector (str (%1 :name) "-" (%1 :version)) (%1 :discoveryRestUrl)) (discovery-doc :items))))
+        (map #(vector (%1 :name) (%1 :version) (%1 :discoveryRestUrl)) (discovery-doc :items))))
 
 (defn build
 	"Given a discovery document URL, construct an map of names to functions that 
@@ -57,8 +58,14 @@
 	[service method & args]
 	(apply ((service method) :fn) args))
 
-;; TODO: Generate a client from a local file. 
-(defn build-local [file] true)
+(defn im
+	"Call a service, constructing if necessary"
+	[method_name & args]
+	(let [
+		service_name (first (clojure.string/split method_name #"[\.\/]"))
+		api (last (filter #(= (first %1) service_name) (list-apis)))
+		service (build (last api))]
+		(apply call service method_name args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;; HELPER METHODS ;;;;;;;;;;;

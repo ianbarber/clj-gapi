@@ -49,6 +49,9 @@ We can write as well. For example, here we can use the URL shortener API (which 
     (def result (call service "urlshortener.url/insert {} {"longUrl" "http://clojure.org"}))
     (pprint result)
 
+For very simple API access, you can make an immediate call:
+
+    (im "plus.activities/search" auth {"query" "clojure"})
     
 ## License
 
