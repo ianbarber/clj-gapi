@@ -1,3 +1,0 @@
-How is best to indicate private methods in clojure modules? 
-How do multimethods work?
-Can we list everything in a namepsace? may be easier than keeping an atom
