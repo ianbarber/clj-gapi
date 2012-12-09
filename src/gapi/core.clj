@@ -65,19 +65,26 @@
 
 (defn im
 	"Call a service, constructing if necessary"
-	[auth method_name & args]
-	(let [
-		service_name (first (clojure.string/split method_name #"[\.\/]"))
-		api (last (filter #(= (first %1) service_name) (m-list-apis)))
-		service (m-build (last api))]
-		(apply call auth service method_name args)))
+	([auth method_name & args]
+		(let [
+			service_name (first (clojure.string/split method_name #"[\.\/]"))
+			api (last (filter #(= (first %1) service_name) (m-list-apis)))
+			service (m-build (last api))]
+			(apply call auth service method_name args))))
+
+(defn anon-im
+	"Call to a service without authentication"
+	[method_name & args]
+	(apply im nil method_name args))
 
 (defn api-ns
 	"Create a namespace for the API calls. TODO: details"
-	[auth api_url]
-	(let [	service (m-build api_url)
-			build-fn (partial build-ns auth)]
-		(map build-fn service)))
+	([api_url]
+		(api-ns nil api_url))
+	([auth api_url]
+		(let [	service (m-build api_url)
+				build-fn (partial build-ns auth)]
+			(map build-fn service))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;; HELPER METHODS ;;;;;;;;;;;
@@ -127,7 +134,8 @@
 	[res]
 	(if (= (res :status) 200)
 		(json/read-json (res :body))
-		"TODO: error handling"))
+		(let [body (json/read-json (res :body))]
+			{:error ((body :error) :message)})))
 
 (defn- get-url
 	"Replace URL path parameters with their values"
@@ -144,13 +152,13 @@
 	(fn ([state args]
 		{:pre [(hasreqs? method_params args)]}
 		(get-response (http/get (get-url base_url path (get-path-params method_params) args)
-			(auth/call-params state {:query-params args}))))))
+			(auth/call-params state {:throw-exceptions false :query-params args}))))))
 
 (defmethod callfn "POST" [base_url {path :path method_params :parameters}]
 	(fn ([state args body]
 		{:pre [(hasreqs? method_params args)]}
 		(get-response (http/post (get-url base_url path (get-path-params method_params) args)
-			(auth/call-params state {:body (json/json-str body) :content-type :json :query-params args}))))))
+			(auth/call-params state {:throw-exceptions false :body (json/json-str body) :content-type :json :query-params args}))))))
 
 (defn- docstring
 	"Return a description for this method"

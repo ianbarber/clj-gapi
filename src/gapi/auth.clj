@@ -22,15 +22,21 @@
 
 (defmulti call-params
 	"Update the call parameters with the authentication details"
-	(fn [state params] (string? (@state :token))))
+	(fn [state params] (if (nil? state)
+						:none
+						(if (string? (@state :token))
+							:oauth :simple))))
 
-(defmethod call-params true [state params]
+(defmethod call-params :oauth [state params]
 	;; TODO: check for expired auth token and call refresh if possible
 	(let [headers (if (params :headers) (params :headers) {})]
 		(assoc params :headers (assoc headers "Authorization" (str "Bearer " (@state :token))))))
 
-(defmethod call-params :default [state, params]
+(defmethod call-params :simple [state, params]
 	(assoc params :query-params (assoc (params :query-params) "key" (@state :api_key))))
+
+(defmethod call-params :default [state, params]
+	params)
 
 (defn is-valid
 	"Returns true if the authentication is valid"
