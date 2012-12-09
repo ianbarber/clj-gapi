@@ -89,9 +89,10 @@
 	(let [	name (str "gapi." mname)
 			parts (clojure.string/split name #"[\.\/]")
 			namespace (symbol (clojure.string/join "." (pop parts)))]
-				;; how? ^{:doc (method :doc)} 
 				(if (= nil (find-ns namespace)) (create-ns namespace))
-				(intern namespace (symbol (last parts)) (partial (method :fn) auth))
+				(intern namespace
+					(with-meta (symbol (last parts)) {:doc (method :doc) :arglists (method :arglists)})
+					(partial (method :fn) auth))
 				name))
 
 (defn- get-method-name
@@ -155,11 +156,15 @@
 	"Return a description for this method"
 	[method]
 	(str (method :description) "\n"
-		"Requires [auth parameters"
-		(if (= (method :description) "POST") " body")
-		"]\n"
 		"Required parameters: " (string/join " "(get-required-params (method :parameters)))
 		"\n"))
+
+(defn- arglists
+	"Return an argument list for the method"
+	[method]
+	(let [base_args
+			(if (= (method :description) "POST") '[auth parameters body] '[auth parameters])]
+		base_args))
 
 (defn- extract-methods
 	"Retrieve all methods from the given resource"
@@ -170,5 +175,6 @@
 				(get-method-name (method :id))
 				{:fn (callfn base_url method)
 				 :doc (docstring method)
+				 :arglists (arglists method)
 				 :scopes (method :scopes)}))
 		{} (resource :methods)))

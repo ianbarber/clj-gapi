@@ -19,13 +19,15 @@ Namespace Usage
 
 The library can generate a series of functions in a namespace based on the API name
 
-    (def auth (gapi.auth/create-auth "AIzaSyCEWwrbXAGMK_P97lcq8FOgQGP5LA7QAzk"))
+    (def auth (gapi.auth/create-auth "YOUR_API_KEY"))
     (api-ns auth "https://www.googleapis.com/discovery/v1/apis/plus/v1/rest")
     
-This will generate an API based on the Google+ service. We will now have names such that map to the resources and functions for the activities. For example gapi.plus.activites/search. 
+This will generate an API based on the Google+ service, and will implicitly include the supplied auth example, so you wont need it for future calls. We will now have names such that map to the resources and functions for the activities. For example gapi.plus.activites/search. 
   
     (def results (gapi.plus.activities/search {"query" "clojure"}))
     (pprint (map #(str (%1 :url) "-" (%1 :title)) (results :items)))
+    
+Each generated function has accompanying documentation metadata which can be accessed with the standard doc command.
 
 Other Usage
 -------------------------
