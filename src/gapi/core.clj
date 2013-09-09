@@ -25,7 +25,8 @@
 	"Directly eturn a list of APIs available to built, and endpoint discovery document URLs."
 	[]
     (let [discovery-doc (json/read-json ((http/get discovery_url) :body))]
-        (map #(vector (%1 :name) (%1 :version) (%1 :discoveryRestUrl)) (discovery-doc :items))))
+        (map #(vector (%1 :name) (%1 :version) (%1 :discoveryRestUrl))
+					(filter #(= (%1 :preferred) true) (discovery-doc :items)))))
 
 (defn build
 	"Given a discovery document URL, construct an map of names to functions that 
@@ -158,6 +159,18 @@
 	(fn ([state args body]
 		{:pre [(hasreqs? method_params args)]}
 		(get-response (http/post (get-url base_url path (get-path-params method_params) args)
+			(auth/call-params state {:throw-exceptions false :body (json/json-str body) :content-type :json :query-params args}))))))
+
+(defmethod callfn "DELETE" [base_url {path :path method_params :parameters}]
+	(fn ([state args body]
+		{:pre [(hasreqs? method_params args)]}
+		(get-response (http/delete (get-url base_url path (get-path-params method_params) args)
+			(auth/call-params state {:throw-exceptions false :body (json/json-str body) :content-type :json :query-params args}))))))
+
+(defmethod callfn "PUT" [base_url {path :path method_params :parameters}]
+	(fn ([state args body]
+		{:pre [(hasreqs? method_params args)]}
+		(get-response (http/put (get-url base_url path (get-path-params method_params) args)
 			(auth/call-params state {:throw-exceptions false :body (json/json-str body) :content-type :json :query-params args}))))))
 
 (defn- docstring
