@@ -42,7 +42,7 @@ For simple API access, we need to pass in our API key to the auth class. This re
 
 To retrieve the calls for an API, you pass in the API string. In this case, the Google+ public data API. 
 
-    (def service (build auth "https://www.googleapis.com/discovery/v1/apis/plus/v1/rest"))
+    (def service (build "https://www.googleapis.com/discovery/v1/apis/plus/v1/rest"))
   
 Too see which methods are available:
 
