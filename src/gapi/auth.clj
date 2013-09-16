@@ -39,16 +39,18 @@
 	params)
 
 (defn is-valid
-	"Returns true if the authentication is valid"
+	"Returns true if the authentication is valid, and in date."
 	[state]
-	(if (state :authtoken)
-		true ;; TODO: check expiry
+	(if (@state :token)
+		(< (System/currentTimeMillis) (@state :expires))
 		false))
 
 (defn generate-auth-url
 	"Retrieve a URL suitable for redirecting the user to for auth permissions. 
-	Scopes should be supplied as a vector of required scopes."
-	[state scopes]
+	Scopes should be supplied as a vector of required scopes. An optional third
+	param is a map with access_type and approval_prompt keys."
+	([state scopes] (generate-auth-url state scopes {:access_type "offline" :approval_prompt "auto"}))
+	([state scopes opts]
 	(let [
 		oauth2-state  (generate-state)
 		params [
@@ -57,11 +59,11 @@
 			(encode "scope" (string/join " " scopes))
 			(encode "state" oauth2-state)
 			"response_type=code"
-			"access_type=offline"
-			"approval_promp=auto"
+			(encode "access_type" (opts :access_type))
+			(encode "approval_prompt" (opts :approval_prompt))
 		]]
 	(swap! state assoc :state oauth2-state)
-	(str auth_url "?" (string/join "&" params))))
+	(str auth_url "?" (string/join "&" params)))))
 
 (defn exchange-token
 	"Handle the user response from the oauth flow and retrieve a valid
@@ -87,7 +89,21 @@
 
 (defn refresh-token
 	"Generate a new authentication token using the refresh token"
-	[state] true)
+	[state]
+	(if (@state :refresh)
+		(let [params [
+				(encode "client_id" (@state :client_id))
+				(encode "client_secret" (@state :client_secret))
+				(encode "refresh_token" (@state :refresh))
+				"grant_type=refresh_token"
+			]
+			http_resp (http/post token_url {:body (string/join "&" params)
+					:content-type "application/x-www-form-urlencoded"})
+			resp (json/read-json (http_resp :body))]
+			(swap! state assoc :token (resp :access_token)
+				:expires (+ (System/currentTimeMillis) (* (resp :expires_in) 1000)))
+			true)
+		false))
 
 (defn- encode
 	"Combine the key and value with an = and URL encode each part"
@@ -98,8 +114,8 @@
 	"Generate a random string for the state"
 	[]
 	(let [buff (make-array Byte/TYPE 10)]
-    	(-> (java.security.SecureRandom.)
-        	(.nextBytes buff))
-    	(-> (org.apache.commons.codec.binary.Base64.)
-        	(.encode buff)
-        	(String.))))
+    (-> (java.security.SecureRandom.)
+			(.nextBytes buff))
+   	(-> (org.apache.commons.codec.binary.Base64.)
+     	(.encode buff)
+     	(String.))))
