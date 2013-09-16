@@ -41,7 +41,7 @@
 (defn is-valid
 	"Returns true if the authentication is valid"
 	[state]
-	(if (state :authtoken)
+	(if (@state :token)
 		true ;; TODO: check expiry
 		false))
 
@@ -98,8 +98,8 @@
 	"Generate a random string for the state"
 	[]
 	(let [buff (make-array Byte/TYPE 10)]
-    	(-> (java.security.SecureRandom.)
-        	(.nextBytes buff))
-    	(-> (org.apache.commons.codec.binary.Base64.)
-        	(.encode buff)
-        	(String.))))
+          (-> (java.security.SecureRandom.)
+              (.nextBytes buff))
+          (-> (org.apache.commons.codec.binary.Base64.)
+              (.encode buff)
+              (String.))))
