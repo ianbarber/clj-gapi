@@ -1,4 +1,4 @@
-(defproject gapi "1.0.0-SNAPSHOT"
+(defproject gapi "1.0.0"
   :description "A simple pure clojure interface for Google web services"
   :license {:name "The Apache Software License, Version 2.0"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
