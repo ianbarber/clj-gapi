@@ -5,6 +5,8 @@ A simple client for Google web service APIs that are described by the discovery 
 
 Usage
 -------------------------
+In your `project.clj` file, just include the following dependency:
+`[org.clojars.rburrows/gapi "1.0.1"]`
 
 Quick Start
 -------------------------
