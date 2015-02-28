@@ -3,8 +3,10 @@ clj-gapi
 
 A simple client for Google web service APIs that are described by the discovery document API. See https://developers.google.com/console for a full list of APIs that can be addressed by this. Ensure that a console project has been created for any access you wish to do!
 
-Usage
+Installation
 -------------------------
+In your `project.clj` file, just include the following dependency:
+`[gapi "1.0.1"]`
 
 Quick Start
 -------------------------
