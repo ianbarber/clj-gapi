@@ -28,12 +28,12 @@
         (map #(vector (%1 :name) (%1 :version) (%1 :discoveryRestUrl))
 					(filter #(= (%1 :preferred) true) (discovery-doc :items)))))
 
-(defn build-resource [r]
+(defn build-resource [base r]
   (reduce
    (fn [methods [key resource]]
      (merge methods
-            (extract-methods (:baseUrl r) resource)
-            (build-resource resource)))
+            (extract-methods base resource)
+            (build-resource base resource)))
    {}
    (:resources r)))
 
@@ -43,7 +43,8 @@
 	state map, and list of argument values, an in some cases a JSON encoded body to send 
 	(for write calls)"
 	[api_url]
-        (build-resource (json/read-json ((http/get api_url) :body))))
+        (let [r (json/read-json ((http/get api_url) :body))]
+          (build-resource (:baseUrl r) r)))
 
 (defn list-methods
 	"List the available methods in a service"
