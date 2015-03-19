@@ -33,7 +33,7 @@
    (fn [methods [key resource]]
      (merge methods
             (extract-methods (:baseUrl r) resource)
-            (build-resource r)))
+            (build-resource resource)))
    {}
    (:resources r)))
 
