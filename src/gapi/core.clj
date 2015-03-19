@@ -28,17 +28,22 @@
         (map #(vector (%1 :name) (%1 :version) (%1 :discoveryRestUrl))
 					(filter #(= (%1 :preferred) true) (discovery-doc :items)))))
 
+(defn build-resource [r]
+  (reduce
+   (fn [methods [key resource]]
+     (merge methods
+            (extract-methods (:baseUrl r) resource)
+            (build-resource r)))
+   {}
+   (:resources r)))
+
 (defn build
 	"Given a discovery document URL, construct an map of names to functions that 
 	will make the various calls against the resources. Each call accepts a gapi.auth 
 	state map, and list of argument values, an in some cases a JSON encoded body to send 
 	(for write calls)"
 	[api_url]
-    (let [api_doc (json/read-json ((http/get api_url) :body))]
-		(reduce
-			(fn [methods [key resource]] (merge methods (extract-methods (api_doc :baseUrl) resource)))
-			{}
-			(api_doc :resources))))
+        (build-resource (json/read-json ((http/get api_url) :body))))
 
 (defn list-methods
 	"List the available methods in a service"
