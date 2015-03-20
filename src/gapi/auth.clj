@@ -9,11 +9,11 @@
 (def ^:const token-url "https://accounts.google.com/o/oauth2/token")
 (def oauth2-state (string/replace (random/base64 10) #"[\+=/]" "-"))
 
-(defn is-valid [{:keys [token expires]}]
+(defn valid? [{:keys [token expires]}]
   (when token
     (< (System/currentTimeMillis) expires)))
 
-(defn call-params [{:keys [token api-key]} params]  
+(defn auth-params [{:keys [token api-key]} params]  
   (if token
     (update-in params [:headers]
                #(assoc % "Authorization" (str "Bearer " token)))
