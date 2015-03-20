@@ -5,8 +5,6 @@
             [clojure.string :as string]
             [crypto.random :as random]))
 
-(def ^:const auth-url "https://accounts.google.com/o/oauth2/auth")
-(def ^:const token-url "https://accounts.google.com/o/oauth2/token")
 (def oauth2-state (string/replace (random/base64 10) #"[\+=/]" "-"))
 
 (defn valid? [{:keys [token expires]}]
@@ -31,7 +29,7 @@
 (defn generate-auth-url  
   ([auth scopes]
      (generate-auth-url auth scopes "auto"))
-  ([{:keys [client-id redirect-url] :as auth} scopes approval-prompt]     
+  ([{:keys [client-id redirect-url auth-url] :as auth} scopes approval-prompt]     
      (str auth-url "?"
           (encode-params
            {:client_id client-id
@@ -46,7 +44,8 @@
   (generate-auth-url auth scopes "force"))
 
 (defn exchange-token
-  [{:keys [client-id redirect-url client-secret] :as auth} code checkstate]
+  [{:keys [client-id redirect-url client-secret token-url]}
+   code checkstate]
   (when (= oauth2-state checkstate)
     (let [resp
           @(http/post
@@ -60,14 +59,13 @@
              :headers {"Content-Type" "application/x-www-form-urlencoded"}})
           {:keys [access_token refresh_token expires_in]}          
           (json/read-json (:body resp))]
-      (assoc auth
-        :token access_token
-        :refresh refresh_token
-        :expires (+ (System/currentTimeMillis) (* expires_in 1000))))))
+      {:token access_token
+       :refresh refresh_token
+       :expires (+ (System/currentTimeMillis) (* expires_in 1000))})))
 
 (defn refresh-token
-  [{:keys [client-id redirect-url client-secret refresh] :as auth}]
-  (when refresh
+  [{:keys [client-id redirect-url client-secret token-url]} creds]
+  (when-let [refresh (:refresh creds)]
     (let [resp
           @(http/post
             token-url
@@ -78,6 +76,6 @@
               :grant_type "refresh_token"}
              :headers {"Content-Type" "application/x-www-form-urlencoded"}})
           {:keys [access_token expires_in]} (json/read-json (:body resp))]
-      (assoc auth
+      (assoc creds
         :token access_token
         :expires (+ (System/currentTimeMillis) (* expires_in 1000))))))
