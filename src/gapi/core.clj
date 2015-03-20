@@ -155,29 +155,17 @@
 	supplied method description."
 	(fn [base_url method] (method :httpMethod)))
 
-(defmethod callfn "GET" [base_url {path :path method_params :parameters}]
-	(fn ([state args]
-		{:pre [(hasreqs? method_params args)]}
-		(get-response (http/get (get-url base_url path (get-path-params method_params) args)
-			(auth/call-params state {:throw-exceptions false :query-params args}))))))
+(defmacro defcallfn [n fun]
+  `(defmethod callfn ~n [base_url# {path# :path method_params# :parameters}]
+     (fn ([state# args#]
+            {:pre [(hasreqs? method_params# args#)]}
+            (get-response (~fun (get-url base_url# path# (get-path-params method_params#) args#)
+                                (auth/call-params state# {:throw-exceptions false :query-params args#})))))))
 
-(defmethod callfn "POST" [base_url {path :path method_params :parameters}]
-	(fn ([state args body]
-		{:pre [(hasreqs? method_params args)]}
-		(get-response (http/post (get-url base_url path (get-path-params method_params) args)
-			(auth/call-params state {:throw-exceptions false :body (json/json-str body) :content-type :json :query-params args}))))))
-
-(defmethod callfn "DELETE" [base_url {path :path method_params :parameters}]
-	(fn ([state args body]
-		{:pre [(hasreqs? method_params args)]}
-		(get-response (http/delete (get-url base_url path (get-path-params method_params) args)
-			(auth/call-params state {:throw-exceptions false :body (json/json-str body) :content-type :json :query-params args}))))))
-
-(defmethod callfn "PUT" [base_url {path :path method_params :parameters}]
-	(fn ([state args body]
-		{:pre [(hasreqs? method_params args)]}
-		(get-response (http/put (get-url base_url path (get-path-params method_params) args)
-			(auth/call-params state {:throw-exceptions false :body (json/json-str body) :content-type :json :query-params args}))))))
+(defcallfn "GET" http/get)
+(defcallfn "POST" http/post)
+(defcallfn "PUT" http/put)
+(defcallfn "PATCH" http/patch)
 
 (defn- docstring
 	"Return a description for this method"
