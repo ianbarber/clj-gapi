@@ -166,6 +166,10 @@
 (defcallfn "POST" http/post)
 (defcallfn "PUT" http/put)
 (defcallfn "PATCH" http/patch)
+(defcallfn "DELETE" http/delete)
+(defcallfn "COPY" http/copy)
+(defcallfn "MOVE" http/move)
+(defcallfn "HEAD" http/head)
 
 (defn- docstring
 	"Return a description for this method"
