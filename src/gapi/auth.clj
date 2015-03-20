@@ -13,13 +13,12 @@
   (when token
     (< (System/currentTimeMillis) expires)))
 
-(defn call-params [{:keys [token api-key]} params]
-  (when auth
-    (if token
-      (update-in params [:headers]
-                 #(assoc % "Authorization" (str "Bearer " token)))
-      (update-in params [:query-params]
-                 #(assoc % "key" api-key)))))
+(defn call-params [{:keys [token api-key]} params]  
+  (if token
+    (update-in params [:headers]
+               #(assoc % "Authorization" (str "Bearer " token)))
+    (update-in params [:query-params]
+               #(assoc % "key" api-key))))
 
 (defn encode-params [params]
   (->> params
@@ -59,7 +58,6 @@
               :client_secret client-secret
               :grant_type "authorization_code"}
              :headers {"Content-Type" "application/x-www-form-urlencoded"}})
-          _ (println resp)
           {:keys [access_token refresh_token expires_in]}          
           (json/read-json (:body resp))]
       (assoc auth
