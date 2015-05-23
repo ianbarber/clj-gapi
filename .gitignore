@@ -1,1 +1,13 @@
 # Created by .ignore support plugin (hsz.mobi)
+### Leiningen template
+pom.xml
+pom.xml.asc
+*jar
+target/
+.lein-deps-sum
+.lein-repl-history
+.lein-plugins/
+.lein-failures
+.nrepl-port
+
+
