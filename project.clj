@@ -4,5 +4,5 @@
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
   :url "https://github.com/ianbarber/clj-gapi"
   :dependencies [[org.clojure/clojure "1.5.1"]
-	[org.clojure/data.json "0.2.3"]
-	[clj-http "0.7.6"]])
+	[org.clojure/data.json "0.2.6"]
+	[clj-http "1.1.2"]])
