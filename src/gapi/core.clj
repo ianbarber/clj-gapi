@@ -179,6 +179,12 @@
 		(get-response (http/put (get-url base_url path (get-path-params method_params) args)
 			(auth/call-params state {:throw-exceptions false :body (json/json-str body) :content-type :json :query-params args}))))))
 
+(defmethod callfn "PATCH" [base_url {path :path method_params :parameters}]
+	(fn ([state args body]
+		{:pre [(hasreqs? method_params args)]}
+		(get-response (http/patch (get-url base_url path (get-path-params method_params) args)
+			(auth/call-params state {:throw-exceptions false :body (json/json-str body) :content-type :json :query-params args}))))))
+
 (defn- docstring
 	"Return a description for this method"
 	[method]
