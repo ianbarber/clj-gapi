@@ -6,7 +6,7 @@ A simple client for Google web service APIs that are described by the discovery 
 Installation
 -------------------------
 In your `project.clj` file, just include the following dependency:
-`[gapi "1.0.1"]`
+`[gapi "1.0.2"]`
 
 Quick Start
 -------------------------
