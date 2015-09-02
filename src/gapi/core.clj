@@ -197,7 +197,7 @@
 	"Return an argument list for the method"
 	[method]
 	(let [base_args
-			(if (= (method :description) "POST") '[auth parameters body] '[auth parameters])]
+			(if (= (method :description) "POST") '[[auth parameters body]] '[[auth parameters]])]
 		base_args))
 
 (defn- extract-methods
