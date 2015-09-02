@@ -2,6 +2,7 @@
     (:require
         [clojure.data.json :as json]
         [clj-http.client :as http]
+        [clj-http.util :refer [url-encode]]
         [clojure.string :as string]
 		[gapi.auth :as auth]))
 
@@ -38,9 +39,9 @@
    (:resources r)))
 
 (defn build
-	"Given a discovery document URL, construct an map of names to functions that 
-	will make the various calls against the resources. Each call accepts a gapi.auth 
-	state map, and list of argument values, an in some cases a JSON encoded body to send 
+	"Given a discovery document URL, construct an map of names to functions that
+	will make the various calls against the resources. Each call accepts a gapi.auth
+	state map, and list of argument values, an in some cases a JSON encoded body to send
 	(for write calls)"
 	[api_url]
         (let [r (json/read-json ((http/get api_url) :body))]
@@ -66,7 +67,7 @@
 	[auth service method & args]
 	(apply ((service method) :fn) auth args))
 
-;; Memoized versions of API calls 
+;; Memoized versions of API calls
 (def ^{:private true} m-list-apis (memoize list-apis))
 (def ^{:private true} m-build (memoize build))
 
@@ -148,7 +149,7 @@
 	"Replace URL path parameters with their values"
 	[base_url path params args]
 	(str base_url
-		(reduce #(string/replace %1 (str "{" %2 "}") (args %2)) path params)))
+		(reduce #(string/replace %1 (str "{" %2 "}") (url-encode (args %2))) path params)))
 
 (defmulti #^{:private true} callfn
 	"Retrieve an anonymous function that makes the proper call for the
